@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -81,4 +81,149 @@
     }
   </script>
 </body>
+</html> -->
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vanilla JavaScript App</title>
+</head>
+<body>
+  <main>
+    <h1>Vanilla JavaScript App</h1>
+    <input type="file" id="inputFile" accept="image/*" multiple>
+    <input type="text" id="textInput" name="textInput">
+    <br>
+    <button id="submitButton">Submit</button>
+    <br>
+    <p id="textResponse"></p>
+    <div id="outputImages"></div>
+  </main>
+
+  <script>
+    const subscriptionKey = 'bfeba954de8f417abaf31f3431231dc8';
+    const endpoint = 'https://shreyascomputervision.cognitiveservices.azure.com/vision/v3.2/analyze';
+
+    const OPENAI_API_BASE = "https://senior-project-azure-openai.openai.azure.com/";
+    const OPENAI_API_VERSION = "2022-12-01";
+    const OPENAI_API_KEY = "97d86c068132451ea9e014b65258c0d0";
+
+    const inputFile = document.getElementById('inputFile');
+    const submitButton = document.getElementById('submitButton');
+    const outputImages = document.getElementById('outputImages');
+    const paragraph = document.getElementById("textResponse");
+
+    submitButton.addEventListener('click', handleFiles, false);
+    
+
+    async function analyzeImage(imageBuffer) {
+      const response = await fetch(endpoint + '?visualFeatures=Objects', {
+        method: 'POST',
+        body: new Blob([imageBuffer], { type: 'application/octet-stream' }),
+        headers: {
+          'Ocp-Apim-Subscription-Key': subscriptionKey,
+          'Content-Type': 'application/octet-stream',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`An error occurred: ${response.statusText}`);
+      }
+
+      return await response.json();
+    }
+
+    async function generateResponse(image_details) {
+        let textInput=image_details.concat(document.getElementById("textInput").value)
+           // https://senior-project-azure-openai.openai.azure.com/openai/deployments/text_davinci/completions?api-version=2022-12-01
+   //https://senior-project-azure-openai.openai.azure.com/openai/deployments/chatgpt35/completions?api-version=2022-12-01
+  const response = await fetch(`https://senior-project-azure-openai.openai.azure.com/openai/deployments/text_davinci/completions?api-version=2022-12-01`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'api-key': OPENAI_API_KEY
+      
+    },
+    body: JSON.stringify({
+  "prompt": textInput ,
+  "temperature": 1,
+  "top_p": 0.5,
+  "frequency_penalty": 0,
+  "presence_penalty": 0,
+  "max_tokens": 100,
+  "stop": null
+})
+  });
+
+  const data = await response.json();
+  console.log(data)
+  responsetext=data.choices[0].text;
+  paragraph.textContent = responsetext;
+}
+
+    async function handleFiles(event) {
+        
+        paragraph.textContent = '';
+        while (outputImages.firstChild) {
+            outputImages.removeChild(outputImages.firstChild);
+        }
+      const fileList = inputFile.files;
+        let text_sentence='This folder has ';
+        text_sentence=text_sentence.concat(fileList.length,' images. ')
+        let count=0;
+      for (const file of fileList) {
+        const imageBuffer = await file.arrayBuffer();
+        try {
+
+          const result = await analyzeImage(imageBuffer);
+          count=count+1;
+          const img = new Image();
+          img.src = URL.createObjectURL(new Blob([imageBuffer], { type: 'image/png' }));
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+
+            ctx.strokeStyle = 'red';
+            ctx.lineWidth = 5;
+
+            text_sentence=text_sentence.concat('In image #', count, ' there is');
+            console.log(JSON.stringify(text_sentence, null, 4));
+            for (const object of result.objects) {
+              const left = object.rectangle.x;
+              const top = object.rectangle.y;
+              const width = object.rectangle.w;
+              const height = object.rectangle.h;
+
+              ctx.strokeRect(left, top, width, height);
+              ctx.font = '16px Arial';
+              ctx.fillStyle = 'red';
+              console.log(JSON.stringify(object, null, 4));
+
+              ctx.fillText(`${object.object} (${object.confidence * 100}%)`, left + 5, top + height - 30);
+            
+              text_sentence=text_sentence.concat(' a ', object.object, ' in a box at [left,top]=[',left,',',top,'] and [height width]=[',height,',',width,'] with ',object.confidence, ' confidence,');
+            }
+            text_sentence = text_sentence.substring(0, text_sentence.length - 1);
+            text_sentence=text_sentence.concat('.');
+            console.log(JSON.stringify(text_sentence, null, 4));
+            outputImages.appendChild(canvas);
+          };
+        } catch (error) {
+          console.error('Error processing the image:', error);
+        }
+      }
+      generateResponse(text_sentence)
+    }
+
+  </script>
+</body>
 </html>
+
+
