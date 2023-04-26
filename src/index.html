@@ -144,7 +144,8 @@
         promptp.textContent=b.concat(textInput);
            // https://senior-project-azure-openai.openai.azure.com/openai/deployments/text_davinci/completions?api-version=2022-12-01
    //https://senior-project-azure-openai.openai.azure.com/openai/deployments/chatgpt35/completions?api-version=2022-12-01
-  const response = await fetch(`https://senior-project-azure-openai.openai.azure.com/openai/deployments/chatgpt35/completions?api-version=2022-12-01`, {
+      //https://senior-project-azure-openai.openai.azure.com/openai/deployments/text_davinci003/completions?api-version=2022-12-01
+  const response = await fetch(`https://senior-project-azure-openai.openai.azure.com/openai/deployments/text_davinci003/completions?api-version=2022-12-01`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
