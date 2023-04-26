@@ -216,7 +216,7 @@
 
               ctx.fillText(`${object.object} (${object.confidence * 100}%)`, left + 5, top + height - 30);
             
-              text_sentence=text_sentence.concat(' a ', object.object, ' in a box at [left,top]=[',left,',',top,'] and [height width]=[',height,',',width,'] with ',object.confidence, ' confidence,');
+              text_sentence=text_sentence.concat(' a ', object.object, ' in a box at [left,top]=[',left,',',top,'] and [height width]=[',height,',',width,'] with ',object.confidence, ' confidence,',\n);
             }
             text_sentence = text_sentence.substring(0, text_sentence.length - 1);
             text_sentence=text_sentence.concat('.');
