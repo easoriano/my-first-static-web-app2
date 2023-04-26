@@ -83,12 +83,13 @@
 </body>
 </html> -->
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vanilla JavaScript App</title>
+  <title>Senior Project App</title>
 </head>
 <body>
   <main>
@@ -141,6 +142,7 @@
     async function generateResponse(image_details) {
         let textInput=image_details.concat(' ' , document.getElementById("textInput").value)
         let b='Input Prompt Sent to OpenAI Text Model:    '
+        console.log('h');
         promptp.textContent=b.concat(textInput);
            // https://senior-project-azure-openai.openai.azure.com/openai/deployments/text_davinci/completions?api-version=2022-12-01
    //https://senior-project-azure-openai.openai.azure.com/openai/deployments/chatgpt35/completions?api-version=2022-12-01
@@ -181,6 +183,7 @@
         text_sentence=text_sentence.concat(fileList.length,' images. ')
         let count=0;
       for (const file of fileList) {
+        
         const imageBuffer = await file.arrayBuffer();
         try {
 
@@ -217,16 +220,22 @@
             }
             text_sentence = text_sentence.substring(0, text_sentence.length - 1);
             text_sentence=text_sentence.concat('.');
+            console.log('t');
             console.log(JSON.stringify(text_sentence, null, 4));
             outputImages.appendChild(canvas);
+            console.log(count)
+            if (count==fileList.length)
+            {
+              generateResponse(text_sentence)
+            }
           };
         } catch (error) {
           console.error('Error processing the image:', error);
         }
       }
-      generateResponse(text_sentence)
     }
 
   </script>
 </body>
 </html>
+
